@@ -42,6 +42,13 @@ AIC.fixed <- 2*fixed.free.params - 2*log(fixed.likelihood)
 BIC.variable <- variable.free.params*log(nrow(all.data)) - 2*log(variable.likelihood)
 BIC.fixed <- fixed.free.params*log(nrow(all.data)) - 2*log(fixed.likelihood)
 
+AIC.variable <- 2*variable.free.params - 2*variable.likelihood
+AIC.fixed <- 2*fixed.free.params - 2*fixed.likelihood
+
+BIC.variable <- variable.free.params*log(nrow(all.data)) - 2*variable.likelihood
+BIC.fixed <- fixed.free.params*log(nrow(all.data)) - 2*fixed.likelihood
+
+
 exp((AIC.variable - AIC.fixed)/2)
 
 #We should favor the variable decay rate model; both the Akaike and Bayes IC's 

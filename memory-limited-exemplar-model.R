@@ -38,7 +38,7 @@ exemplar.memory.limited <- function(training.data, x.val, y.val, target.category
   training.data$weights <- sapply(exponents, function(expo) {return (1*(decay.rate^expo))})
   
   distances <- mapply(function(x, y) {return (sqrt((x - x.val)^2 + (y - y.val)^2))},  training.data$x, training.data$y)
-  similarities <- sapply(distances, function(dist) {return (exp(-sensitivity*dist))})
+  similarities <- sapply(distances, function(dist) {return (exp((-sensitivity)*dist))})
   
   training.data$weighted.similarities <- similarities*training.data$weights
   prob <- (sum(subset(training.data, category==target.category)$weighted.similarities) / sum(training.data$weighted.similarities))

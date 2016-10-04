@@ -69,9 +69,11 @@ sample.data.set[4,]
 
 exemplar.memory.log.likelihood <- function(all.data, sensitivity, decay.rate){
   indices <- 1:nrow(all.data)
-  tot.likelihood <- 0
   
-  if ((sensitivity <= 0) || (decay.rate < 0) || (decay.rate > 1)) {
+  test.1 <- (sensitivity <= 0)
+  test.2 <- (decay.rate < 0)
+  test.3 <- (decay.rate > 1)
+  if (test.1 || test.2 || test.3) {
     return (NA)
   }
   
@@ -96,11 +98,7 @@ exemplar.memory.log.likelihood <- function(all.data, sensitivity, decay.rate){
     }
   })
   
-  log.likelihoods <- sapply(subject.likelihoods, function(x) {
-    return (log(x))
-  })
-  
-  return (sum(log.likelihoods))
+  return (-sum(log(subject.likelihoods)))
 }
 
 exemplar.memory.log.likelihood(sample.data.set, 10, .2)

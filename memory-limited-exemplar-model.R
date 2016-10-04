@@ -34,7 +34,15 @@
 sample.training.data <- data.frame(x=c(0.5,0.6), y=c(0.4,0.3), category=c(1,2))
 
 exemplar.memory.limited <- function(training.data, x.val, y.val, target.category, sensitivity, decay.rate){
-  return(NA)
+  exponents <- (nrow(training.data) - 1):0
+  training.data$weights <- sapply(exponents, function(expo) {return (1*(decay.rate^expo))})
+  
+  distances <- mapply(function(x, y) {return (sqrt((x - x.val)^2 + (y - y.val)^2))},  training.data$x, training.data$y)
+  similarities <- sapply(distances, function(dist) {return (exp(-sensitivity*dist))})
+  
+  training.data$weighted.similarities <- similarities*training.data$weights
+  prob <- (sum(subset(training.data, category==target.category)$weighted.similarities) / sum(training.data$weighted.similarities))
+  return (max(prob, .001))
 }
 
 # Once you have the model implemented, write the log-likelihood function for a set of data.
@@ -60,5 +68,39 @@ sample.data.set[4,]
 # Don't forget that decay rate should be between 0 and 1, and that sensitivity should be > 0.
 
 exemplar.memory.log.likelihood <- function(all.data, sensitivity, decay.rate){
-  return(NA)
+  indices <- 1:nrow(all.data)
+  tot.likelihood <- 0
+  
+  if ((sensitivity <= 0) || (decay.rate < 0) || (decay.rate > 1)) {
+    return (NA)
+  }
+  
+  #the likelihood of guessing the target category for each row
+  target.likelihoods <- sapply(indices, function(ind) {
+    if (ind == 1) {
+      #the first trial is 50/50 chance
+      return (.5)
+    } else {
+      training <- all.data[0:(ind-1),]
+      test <- all.data[ind,]
+      return (exemplar.memory.limited(training, test$x, test$y, test$category, sensitivity, decay.rate))
+    }
+  })
+  
+  #the likelihood of the participant's response given the likelihood of the correct guess
+  subject.likelihoods <- sapply(indices, function(ind) {
+    if (all.data[ind,]$correct) {
+      return (target.likelihoods[ind])
+    } else {
+      return (1 - target.likelihoods[ind])
+    }
+  })
+  
+  log.likelihoods <- sapply(subject.likelihoods, function(x) {
+    return (log(x))
+  })
+  
+  return (sum(log.likelihoods))
 }
+
+exemplar.memory.log.likelihood(sample.data.set, 10, .2)
